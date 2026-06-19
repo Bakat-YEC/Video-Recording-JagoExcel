@@ -624,32 +624,8 @@ margin:20px auto 40px auto;
   gap: 10px;
 
   line-height: 1.4;
-}
-
-.tip-close{
-  cursor: pointer;
-  font-weight: bold;
-  opacity: 0.6;
-  transition: 0.2s;
-}
-
-.tip-close:hover{
-  opacity: 1;
-  transform: scale(1.2);
-}.video-tip{
-  margin-top: 12px;
-  padding: 10px 14px;
-  font-size: 13px;
-  color: var(--muted);
-  background: rgba(255,255,255,0.05);
-  border-radius: 10px;
-
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-
-  line-height: 1.4;
+  max-width: 100%;
+  word-wrap: break-word;
 }
 
 .tip-close{
@@ -674,11 +650,6 @@ margin:20px auto 40px auto;
   .tip-close{
     align-self: flex-end;
   }
-}
-
-.video-tip{
-  max-width: 100%;
-  word-wrap: break-word;
 }
   
 </style>
@@ -1683,14 +1654,14 @@ document.getElementById("app").innerHTML=`
 
 <div class="player" id="player">
 
+  <div class="video-tip" id="videoTip">
+    💡 Tips: Klik ikon fullscreen [ ] di pojok kanan bawah video untuk kenyamanan belajar. Jika tidak muncul, coba kecilkan/perbesar layar browser.
+    
+    <span class="tip-close" onclick="closeTip()">✖</span>
+  </div>
+
   <div class="player-text">Pilih video</div>
 
-</div>
-
-<!-- 💡 VIDEO TIP -->
-<div class="video-tip" id="videoTip">
-  💡 Tips: Gunakan fullscreen [ ] di pojok kanan bawah video untuk pengalaman belajar lebih nyaman.
-  <span class="tip-close" onclick="closeTip()">✖</span>
 </div>
 
 
@@ -2062,10 +2033,8 @@ function togglePassword(){
 
 function closeTip(){
   let tip = document.getElementById("videoTip");
-
   if(tip){
     tip.style.display = "none";
-    localStorage.setItem("hideVideoTip", "1");
   }
 }
 </script>
