@@ -406,42 +406,56 @@ color:var(--muted);
 @media(max-width:800px){
 
 
-.video-area{
+.video-wrapper{
 
-display:block;
-
-height:auto;
+height:calc(100vh - 160px);
 
 }
 
-.video-wrapper{
 
-height:auto;
+.video-area{
+
+display:flex;
+
+flex-direction:column;
+
+height:100%;
+
+gap:15px;
 
 }
 
 
 .player{
 
-height:280px;
+height:32vh;
 
-position:relative;
+min-height:230px;
+
+max-height:350px;
+
+position:sticky;
+
+top:10px;
+
+z-index:10;
 
 }
 
 
 #content{
 
-height:auto;
+height:calc(100vh - 470px);
 
-max-height:none;
+overflow-y:auto;
 
-overflow:visible;
+padding-right:8px;
+
+}
+
 
 }
 
-
-}
 .back-btn{
 
 margin-top:20px;
@@ -466,6 +480,10 @@ font-weight:bold;
 
 }
 
+#password {
+  transition: opacity 0.15s ease;
+}
+  
 </style>
 
 
@@ -649,11 +667,30 @@ placeholder="Nama Lengkap / Username Admin"
 
 
 
-<input 
-id="password"
-type="password"
-placeholder="Kode Batch / Password"
->
+<div style="position:relative;">
+
+  <input 
+    id="password"
+    type="password"
+    placeholder="Kode Batch / Password"
+  >
+
+  <span 
+    onclick="togglePassword()" 
+    style="
+      position:absolute;
+      right:12px;
+      top:50%;
+      transform:translateY(-50%);
+      cursor:pointer;
+      color:#aaa;
+      font-size:14px;
+      user-select:none;
+    ">
+    👁
+  </span>
+
+</div>>
 
 
 
@@ -1618,7 +1655,31 @@ showPeserta();
 // ==========================================
 
 
+function togglePassword(){
 
+  let input = document.getElementById("password");
+  let icon = document.getElementById("eyeIcon");
+
+  // fade out dulu
+  input.style.opacity = "0.3";
+
+  setTimeout(() => {
+
+    if(input.type === "password"){
+      input.type = "text";
+      icon.innerHTML = "🙈";
+    } else {
+      input.type = "password";
+      icon.innerHTML = "👁";
+    }
+
+    // fade in lagi
+    input.style.opacity = "1";
+
+  }, 150);
+
+}
+  
 </script>
 
 
