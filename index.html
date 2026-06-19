@@ -461,6 +461,89 @@ font-weight:bold;
 
 }
 
+/* ===========================
+   PENGATURAN KELOLA PESERTA
+   =========================== */
+.search-box {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--muted);
+  background: var(--bg);
+  color: var(--text);
+  margin-bottom: 20px;
+  font-size: 15px;
+}
+
+.table-wrapper {
+  overflow-x: auto;
+  margin-top: 15px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px;
+}
+
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #333;
+}
+
+.light th, .light td {
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  color: var(--muted);
+  font-weight: normal;
+}
+
+.badge {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  background: #3b82f6;
+  color: white;
+  display: inline-block;
+  margin: 2px;
+}
+
+.badge.status-aktif {
+  background: #16a34a;
+}
+
+.badge.status-nonaktif {
+  background: #dc2626;
+}
+
+.btn-small {
+  width: auto;
+  padding: 6px 12px;
+  font-size: 12px;
+  margin-top: 0;
+  margin-right: 5px;
+  display: inline-block;
+}
+
+.btn-danger {
+  background: #dc2626;
+}
+
+.btn-warning {
+  background: #d97706;
+}
+
+.header-peserta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 
 @media(max-width:800px){
 
@@ -573,6 +656,8 @@ const API_URL =
 
 let userData = null;
 
+// Hapus Data Dummy, kita pakai data asli dari server
+let semuaPeserta = [];
 
 
 window.onload=function(){
@@ -586,24 +671,23 @@ localStorage.getItem("user");
 
 if(session){
 
+  // Sistem Pembersih (Anti-Blank Screen)
+  try {
+    userData = JSON.parse(session);
 
-userData =
-JSON.parse(session);
-
-
-
-if(userData.role=="admin"){
-
-showAdmin();
-
-}
-
-else{
-
-showPeserta();
-
-}
-
+    if(userData && userData.role == "admin"){
+      showAdmin();
+    }
+    else if(userData && userData.role == "peserta"){
+      showPeserta();
+    }
+    else {
+      logout();
+    }
+  } catch(e) {
+    // Jika data memori rusak/nyangkut, bersihkan dan suruh login ulang
+    logout();
+  }
 
 }
 else{
@@ -624,7 +708,6 @@ showLogin();
 // ==========================================
 // THEME
 // ==========================================
-
 
 function toggleTheme(){
 
@@ -1220,7 +1303,7 @@ Menu Admin
 
 
 
-<button>
+<button onclick="showKelolaPeserta()">
 
 👥 Kelola Peserta
 
@@ -1347,6 +1430,155 @@ html+=`
 box.innerHTML=html;
 
 
+}
+
+// ==========================================
+// KELOLA PESERTA (LIVE API)
+// ==========================================
+
+function showKelolaPeserta(){
+
+  let box = document.getElementById("adminContent");
+
+  let html = `
+    <div class="header-peserta">
+      <h3>👥 Kelola Peserta</h3>
+      <button class="btn-small" style="background:var(--primary);">+ Tambah Peserta</button>
+    </div>
+
+    <input type="text" id="searchPeserta" class="search-box" placeholder="🔍 Cari nama peserta atau kelas..." onkeyup="filterPeserta()">
+
+    <div class="card">
+      <div class="table-wrapper">
+        <table id="tabelPeserta">
+          <thead>
+            <tr>
+              <th>Nama / ID</th>
+              <th>Akses Kelas</th>
+              <th>Login Terakhir</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="bodyPeserta">
+            <tr><td colspan="5" style="text-align:center; padding: 30px;">⏳ Memuat data dari Google Sheet...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  box.innerHTML = html;
+  
+  // Ambil data asli dari Google Script
+  fetchDataPeserta();
+}
+
+function fetchDataPeserta() {
+  fetch(API_URL + "?action=getAllPeserta")
+    .then(r => r.json())
+    .then(res => {
+      if(res.status === "success") {
+        semuaPeserta = res.data;
+        renderTabelPeserta(semuaPeserta);
+      } else {
+        document.getElementById("bodyPeserta").innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">❌ Gagal memuat data: ${res.message}</td></tr>`;
+      }
+    })
+    .catch(err => {
+      document.getElementById("bodyPeserta").innerHTML = `<tr><td colspan="5" style="text-align:center; color:red;">❌ Error jaringan. Pastikan Apps Script sudah di-deploy dengan opsi 'Anyone'.</td></tr>`;
+    });
+}
+
+
+function renderTabelPeserta(data) {
+  let tbody = document.getElementById("bodyPeserta");
+  let html = "";
+
+  if(data.length === 0){
+    html = `<tr><td colspan="5" style="text-align:center; padding: 20px;">Peserta tidak ditemukan</td></tr>`;
+  }
+
+  data.forEach(p => {
+    
+    let batchBadges = p.batch.length > 0 
+      ? p.batch.map(b => `<div style="margin-bottom:4px;"><span class="badge">${b.nama}</span> <span class="badge" style="background:#4b5563;">🔑 ${b.kode}</span></div>`).join("") 
+      : `<span class="small">- Belum ada akses -</span>`;
+
+    let statusBadge = p.status === "AKTIF" 
+      ? `<span class="badge status-aktif" id="badge-${p.id}">AKTIF</span>` 
+      : `<span class="badge status-nonaktif" id="badge-${p.id}">NONAKTIF</span>`;
+
+    let actionBtn = p.status === "AKTIF"
+      ? `<button class="btn-small btn-danger" id="btn-${p.id}" onclick="toggleStatus('${p.id}')">❌ Disable</button>`
+      : `<button class="btn-small" id="btn-${p.id}" onclick="toggleStatus('${p.id}')">✅ Enable</button>`;
+
+    html += `
+      <tr>
+        <td>
+          <strong>${p.nama}</strong><br>
+          <span class="small">${p.id}</span><br>
+          <span class="small" style="color:var(--primary);">📧 ${p.email}</span><br>
+          <span class="small" style="color:var(--muted);">📱 ${p.hp}</span>
+        </td>
+        <td>${batchBadges}</td>
+        <td><span class="small">${p.loginTerakhir}</span></td>
+        <td>${statusBadge}</td>
+        <td>
+          ${actionBtn}
+          <button class="btn-small btn-warning">📦 Edit Kelas</button>
+        </td>
+      </tr>
+    `;
+  });
+
+  tbody.innerHTML = html;
+}
+
+
+function filterPeserta() {
+  let keyword = document.getElementById("searchPeserta").value.toLowerCase();
+  
+  let filtered = semuaPeserta.filter(p => {
+    let matchName = p.nama.toLowerCase().includes(keyword);
+    let matchBatch = p.batch.some(b => b.toLowerCase().includes(keyword));
+    return matchName || matchBatch;
+  });
+
+  renderTabelPeserta(filtered);
+}
+
+// ==========================================
+// MENGUBAH STATUS PESERTA (LIVE API)
+// ==========================================
+function toggleStatus(id) {
+  let btn = document.getElementById("btn-" + id);
+  let oldText = btn.innerHTML;
+  btn.innerHTML = "⏳ Wait...";
+  btn.disabled = true;
+
+  fetch(API_URL + "?action=toggleStatusPeserta&id=" + encodeURIComponent(id))
+    .then(r => r.json())
+    .then(res => {
+      if(res.status === "success") {
+         // Update data lokal
+         let index = semuaPeserta.findIndex(p => p.id === id);
+         if(index !== -1){
+            semuaPeserta[index].status = res.newStatus;
+         }
+         // Render ulang filter
+         filterPeserta();
+      } else {
+         alert("Gagal mengubah status: " + res.message);
+         btn.innerHTML = oldText;
+         btn.disabled = false;
+      }
+    })
+    .catch(err => {
+      alert("Terjadi kesalahan jaringan");
+      btn.innerHTML = oldText;
+      btn.disabled = false;
+    });
 }
 
 // ==========================================
