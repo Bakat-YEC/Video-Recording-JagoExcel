@@ -567,16 +567,19 @@ display:block;
 
 .player{
 position:relative !important;
-width:110%;
+width:110% !important; /* Diubah menjadi 110% */
 height:380px !important;
 display:block;
 border-radius:12px !important;
 overflow:visible !important;
 margin-bottom:20px;
-margin-left: auto !important;  /* Menyeimbangkan sisi kiri */
-margin-right: auto !important; /* Menyeimbangkan sisi kanan */
 z-index: 1;
+
+/* Trik ini otomatis menyesuaikan berapapun lebarnya */
+left: 50% !important;
+transform: translateX(-50%) !important;
 }
+
 
 .player iframe{
 position:absolute;
