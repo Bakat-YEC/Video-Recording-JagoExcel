@@ -316,13 +316,43 @@ function showAdmin(){
   let html=`<div class="container">
   <h2>👑 Admin Panel</h2><p>📗 Jago Excel by YEC.CO.ID</p>
   <div class="card">
-  <h3>Menu Admin</h3>
+  
+  <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">
+    <h3 style="margin: 0;">Menu Admin</h3>
+    
+    <!-- Tombol Logout Power Custom (Hanya Ikon) -->
+    <button onclick="logout()" title="Logout" style="
+      width: auto; 
+      margin: 0; 
+      padding: 10px; 
+      background: #dc2626; 
+      color: white; 
+      border-radius: 12px; 
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      border: 1px solid #b91c1c;
+      transition: 0.2s;
+    " onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+      
+      <!-- Icon Power SVG -->
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+        <line x1="12" y1="2" x2="12" y2="12"></line>
+      </svg>
+
+    </button>
+  </div>
+
   <button onclick="showAllBatch()">📚 Lihat Semua Kelas</button>
   <button onclick="showKelolaPeserta()">👥 Kelola Peserta</button>
   <button onclick="showPengaturan()">⚙️ Pengaturan</button>
   </div>
   <div id="adminContent"></div>
   <button class="logout" onclick="logout()">🚪 Logout</button></div>`;
+  
   document.getElementById("app").innerHTML=html;
   showAllBatch();
 }
